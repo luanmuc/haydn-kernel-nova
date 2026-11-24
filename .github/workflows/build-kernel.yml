@@ -44,6 +44,12 @@ jobs:
           submodules: recursive
           fetch-depth: 1
 
+      - name: "1a) 应用 Nova 5.4 兼容补丁"
+        run: |
+          set -eu
+          chmod +x scripts/apply-nova-patches.sh
+          ./scripts/apply-nova-patches.sh
+
       - name: "1b) 快速自检：KSU 子模块必须就位"
         run: |
           set -eu
