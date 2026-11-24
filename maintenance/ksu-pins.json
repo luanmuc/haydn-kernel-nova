@@ -13,5 +13,8 @@
   "last_build_run": "https://github.com/luanmuc/haydn-kernel-nova/actions/runs/45416356639",
   "last_build_artifact": "HoshinoNeko_haydn_4e8e4cb2e_Any3Kernel.zip",
   "last_build_sha256": "bafdf8246f82a2a37141cd7d0d2ac83c1f9d4e766c1e03ed54ad9e3e984986af",
-  "runtime_verified": false
+  "runtime_verified": false,
+  "release_status": "draft-unverified",
+  "release_draft_id": "456908899",
+  "release_draft_url": "https://github.com/luanmuc/haydn-kernel-nova/releases/tag/untagged-42ce551faab427e85373"
 }
