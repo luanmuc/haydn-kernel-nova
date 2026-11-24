@@ -4,6 +4,9 @@ name: Build Kernel · haydn (K40 Pro/Pro+)
 
 "on":
   workflow_dispatch:
+  push:
+    branches:
+      - haydn/nova-builtin-new
 
 permissions:
   contents: read
