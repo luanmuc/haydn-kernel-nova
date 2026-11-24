@@ -14,7 +14,7 @@
 - SUSFS：`v2.4.0`（GKI 5.10 核心移植到 5.4；编译通过，真机未验证）
 - 管理器：`com.sukisu.nova`
 - 适用设备：Redmi K40 Pro / Pro+（haydn）
-- 当前构建：`ee076cc81` / run `45406634493`（success，测试包，不是正式版）
+- 当前构建：`4e8e4cb2e` / run `45416356639`（success，测试包，不是正式版）
 - 禁止：不要刷 BakaSU 线的包，不要与 BakaSU 管理器混装
 
 ---

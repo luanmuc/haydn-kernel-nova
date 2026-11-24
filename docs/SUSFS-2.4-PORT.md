@@ -5,10 +5,10 @@
 - 目标线：SukiSU-Nova `builtin`，commit `4bec532dd447e2852aa8932afa768255350c103a`
 - SUSFS：`v2.4.0`，来自 `tmp/susfs-2.4-5.10/kernel_patches/`（GKI 5.10 补丁）
 - 内核：haydn / SM8350 / 5.4.302
-- 首次云端构建：run `45406634493`，**success**
-- 构建提交：`ee076cc8125a702f13d9769202f30e6c32e9f955`
-- 产物：`HoshinoNeko_haydn_ee076cc81_Any3Kernel.zip`
-- SHA256：`2d159f048cf54b49c883853cfb800763ede4a263f4fc4cbfcfb23d2a0eb11cd1`
+- 首次完整构建：run `45406634493`，**success**（提交 `ee076cc81`）
+- 当前最新测试构建：run `45416356639`，**success**（提交 `4e8e4cb2e`）
+- 产物：`HoshinoNeko_haydn_4e8e4cb2e_Any3Kernel.zip`
+- SHA256：`bafdf8246f82a2a37141cd7d0d2ac83c1f9d4e766c1e03ed54ad9e3e984986af`
 - 状态：**编译通过；真机 root / SUSFS 行为尚未验证**
 
 ## 生效配置
@@ -41,3 +41,10 @@
 - 5.4 `fsnotify` 的 `handle_event` 与 5.10 `handle_inode_event` 语义接近但不完全等价；`/sdcard/Android` 解密后的清理逻辑需真机验证。
 - `CONFIG_KSU_SUSFS_SUS_KSTAT` 的 `susfs_get_non_sus_mnt_id_from_mnt()` 依赖 `CONFIG_KSU_SUSFS_SUS_MOUNT`；当前默认开启，若后续裁掉 SUS_MOUNT 需要补依赖或空实现。
 - 本包不是正式版；正式发布前必须完成真机验证并把结果写回本文件。
+
+## 命令层审计
+
+- `KernelSU/kernel/supercall/dispatch.c` 的 `CMD_SUSFS_*` 派发已与 `susfs_def.h` 对齐检查。
+- 补上 2.4 的 `CMD_SUSFS_SET_SUS_PATH_UID_FILTER` -> `susfs_set_sus_path_uid_filter()`；补丁 `patches/nova/5.4/0002-susfs-uid-filter-dispatch.patch` 由 CI 自动应用。
+- `CMD_SUSFS_SET_PRIORITY_UID_FILTER`、`CMD_SUSFS_ENABLE_AVC_LOG_SPOOFING`、`CMD_SUSFS_SHOW_ENABLED_FEATURES`、`CMD_SUSFS_SHOW_VERSION` / `SHOW_VARIANT` 已接线。
+- 仍保留的未派发命令均为 2.4 头里的 deprecated 命令（`ADD_SUS_MOUNT`、`ADD_TRY_UMOUNT`、`SUS_SU`、`IS_SUS_SU_READY`、旧 root path 命令等），不应当作新功能使用。

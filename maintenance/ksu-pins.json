@@ -9,9 +9,9 @@
   "kernel": "5.4.302",
   "verified_at": "2026-11-24",
   "status": "susfs-2.4-ci-built-runtime-unverified",
-  "last_build_commit": "ee076cc8125a702f13d9769202f30e6c32e9f955",
-  "last_build_run": "https://github.com/luanmuc/haydn-kernel-nova/actions/runs/45406634493",
-  "last_build_artifact": "HoshinoNeko_haydn_ee076cc81_Any3Kernel.zip",
-  "last_build_sha256": "2d159f048cf54b49c883853cfb800763ede4a263f4fc4cbfcfb23d2a0eb11cd1",
+  "last_build_commit": "4e8e4cb2ed85f0f4eba24f0e8d2bbbe003781de9",
+  "last_build_run": "https://github.com/luanmuc/haydn-kernel-nova/actions/runs/45416356639",
+  "last_build_artifact": "HoshinoNeko_haydn_4e8e4cb2e_Any3Kernel.zip",
+  "last_build_sha256": "bafdf8246f82a2a37141cd7d0d2ac83c1f9d4e766c1e03ed54ad9e3e984986af",
   "runtime_verified": false
 }
