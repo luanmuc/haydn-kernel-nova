@@ -21,6 +21,8 @@
 #include <linux/susfs_def.h>
 extern bool ksu_su_compat_enabled;
 extern bool __ksu_is_allow_uid_for_current(uid_t uid);
+extern int filename_lookup(int dfd, struct filename *name, unsigned flags,
+			   struct path *path, struct path *root);
 extern int ksu_handle_stat(int *dfd, struct filename **filename, int *flags);
 #endif
 
