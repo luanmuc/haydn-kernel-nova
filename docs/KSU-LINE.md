@@ -4,7 +4,7 @@
 - 分支：`haydn/nova`
 - KSU：SukiSU-Nova `builtin`
 - 管理器：`com.sukisu.nova`
-- SUSFS：目标 `v2.4.x`
+- SUSFS：`v2.4.0`（5.4 移植，CI 构建通过，真机未验证）
 - 对应 BakaSU 线：<https://github.com/luanmuc/android_kernel_xiaomi_sm8350_miyume>
 
 ## 发布标题

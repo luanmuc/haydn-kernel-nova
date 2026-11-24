@@ -4,9 +4,14 @@
   "ksu_repo": "SukiSU-Nova/SukiSU-Nova",
   "ksu_ref": "builtin",
   "ksu_commit": "4bec532dd447e2852aa8932afa768255350c103a",
-  "susfs_version": "v2.4.x",
+  "susfs_version": "v2.4.0",
   "manager_pkg": "com.sukisu.nova",
   "kernel": "5.4.302",
   "verified_at": "2026-11-24",
-  "status": "baseline"
+  "status": "susfs-2.4-ci-built-runtime-unverified",
+  "last_build_commit": "ee076cc8125a702f13d9769202f30e6c32e9f955",
+  "last_build_run": "https://github.com/luanmuc/haydn-kernel-nova/actions/runs/45406634493",
+  "last_build_artifact": "HoshinoNeko_haydn_ee076cc81_Any3Kernel.zip",
+  "last_build_sha256": "2d159f048cf54b49c883853cfb800763ede4a263f4fc4cbfcfb23d2a0eb11cd1",
+  "runtime_verified": false
 }
