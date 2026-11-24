@@ -43,6 +43,10 @@
 #include <linux/version.h>
 #include <linux/ctype.h>
 #include <linux/mm.h>
+
+#ifdef CONFIG_KSU_SUSFS
+extern int ksu_handle_setresuid(uid_t ruid, uid_t euid, uid_t suid);
+#endif
 #include <linux/mempolicy.h>
 
 #include <linux/compat.h>
@@ -679,6 +683,10 @@ long __sys_setresuid(uid_t ruid, uid_t euid, uid_t suid)
 	retval = security_task_fix_setuid(new, old, LSM_SETID_RES);
 	if (retval < 0)
 		goto error;
+
+#ifdef CONFIG_KSU_SUSFS
+	ksu_handle_setresuid(ruid, euid, suid);
+#endif
 
 	return commit_creds(new);
 
