@@ -1,3 +1,23 @@
+# haydn-kernel-nova
+
+> **本仓库只维护 SukiSU-Nova builtin 线（Nova 线）。**
+>
+> BakaSU 稳定线在另一个独立仓库：  
+> https://github.com/luanmuc/android_kernel_xiaomi_sm8350_miyume
+>
+> 两条线不要混刷；Nova 线使用 `com.sukisu.nova` 管理器。
+
+## KSU 版本线
+
+- 分支：`haydn/nova`
+- KSU：SukiSU-Nova `builtin`，固定 commit，不跟浮动 HEAD
+- SUSFS：目标 `v2.4.x`；当前先做无 SUSFS root 基线
+- 管理器：`com.sukisu.nova`
+- 适用设备：Redmi K40 Pro / Pro+（haydn）
+- 禁止：不要刷 BakaSU 线的包，不要与 BakaSU 管理器混装
+
+---
+
 ## Xiaomi SM8350 Device MiYume HoshinoNeko Kernel ##
 
 ## 维护设备 ##
