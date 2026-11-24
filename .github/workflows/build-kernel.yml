@@ -165,7 +165,7 @@ jobs:
           echo "=== 关键开关核对 ==="
           grep -E "CONFIG_MACH_XIAOMI_HAYDN|CONFIG_LOCALVERSION=|CONFIG_KSU=|CONFIG_KSU_MULTI_MANAGER_SUPPORT|CONFIG_KSU_SUSFS=|CONFIG_KPM=|CONFIG_LTO_CLANG=|CONFIG_LTO_CLANG_THIN=|CONFIG_MODULES=" "out_${DEVICE}/.config" || true
           # Nova 的 KSU 依赖 KPROBES；这两个开关没生效时镜像里不会带 root，必须直接失败。
-          for sym in CONFIG_KPROBES CONFIG_KSU; do
+          for sym in CONFIG_KPROBES CONFIG_KSU CONFIG_KSU_SUSFS; do
             if ! grep -q "^${sym}=y$" "out_${DEVICE}/.config"; then
               echo "::error::${sym}=y 未生效（Nova 需要 CONFIG_KPROBES && CONFIG_EXT4_FS，检查 defconfig 依赖）"
               exit 1

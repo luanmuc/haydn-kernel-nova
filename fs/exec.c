@@ -1932,13 +1932,30 @@ static int do_execveat_common(int fd, struct filename *filename,
 			      struct user_arg_ptr envp,
 			      int flags)
 {
+	int ret;
 #ifdef CONFIG_KSU
 	extern int ksu_handle_execveat(int *fd, struct filename **filename_ptr,
 				       void *argv, void *envp, int *flags);
+#ifdef CONFIG_KSU_SUSFS
+	bool is_su_session = false;
+	if (!susfs_is_current_proc_no_su())
+		is_su_session = (ksu_handle_execveat(&fd, &filename, &argv, &envp, &flags) == 0);
+	else
+		ksu_handle_execveat(&fd, &filename, &argv, &envp, &flags);
+#else
 	ksu_handle_execveat(&fd, &filename, &argv, &envp, &flags);
 #endif
+#endif
 	hwui_mon_handle_exec(filename);
-	return __do_execve_file(fd, filename, argv, envp, flags, NULL);
+	ret = __do_execve_file(fd, filename, argv, envp, flags, NULL);
+#ifdef CONFIG_KSU_SUSFS
+	if (is_su_session && ret >= 0) {
+		extern int ksu_handle_post_execveat_sucompat(int *fd, struct filename **filename_ptr,
+						void *argv, void *envp, int *flags, int *retval);
+		ksu_handle_post_execveat_sucompat(&fd, &filename, &argv, &envp, &flags, &ret);
+	}
+#endif
+	return ret;
 }
 
 int do_execve_file(struct file *file, void *__argv, void *__envp)

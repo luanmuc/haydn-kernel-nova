@@ -34,6 +34,9 @@
 #include <linux/compat.h>
 #ifdef CONFIG_KSU_SUSFS
 #include <linux/susfs_def.h>
+extern bool ksu_su_compat_enabled;
+extern bool __ksu_is_allow_uid_for_current(uid_t uid);
+extern int ksu_handle_faccessat(int *dfd, struct filename **filename, int *mode, int *__unused_flags);
 #endif
 
 #include "internal.h"
@@ -431,11 +434,8 @@ long do_faccessat(int dfd, const char __user *filename, int mode, int flags)
 	int res;
 	unsigned int lookup_flags = LOOKUP_FOLLOW;
 	const struct cred *old_cred = NULL;
-
-#ifdef CONFIG_KSU
-	extern int ksu_handle_faccessat(int *dfd, const char __user **filename_user,
-					int *mode, int *__unused_flags);
-	ksu_handle_faccessat(&dfd, &filename, &mode, NULL);
+#ifdef CONFIG_KSU_SUSFS
+	struct filename *fname = NULL;
 #endif
 
 	if (mode & ~S_IRWXO)
@@ -453,7 +453,25 @@ long do_faccessat(int dfd, const char __user *filename, int mode, int flags)
 			return -ENOMEM;
 	}
 retry:
+#ifdef CONFIG_KSU_SUSFS
+	fname = getname_flags(filename, lookup_flags, NULL);
+	if (IS_ERR(fname)) {
+		res = PTR_ERR(fname);
+		fname = NULL;
+		goto out;
+	}
+
+	if (likely(susfs_is_current_proc_no_su()))
+		goto orig_flow;
+
+	if (ksu_su_compat_enabled && __ksu_is_allow_uid_for_current(current_uid().val))
+		ksu_handle_faccessat(&dfd, &fname, &mode, NULL);
+
+orig_flow:
+	res = filename_lookup(dfd, fname, lookup_flags, &path, NULL);
+#else
 	res = user_path_at(dfd, filename, lookup_flags, &path);
+#endif
 	if (res)
 		goto out;
 
