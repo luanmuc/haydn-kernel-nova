@@ -1,0 +1,12 @@
+{
+  "variant": "nova",
+  "branch": "haydn/nova",
+  "ksu_repo": "SukiSU-Nova/SukiSU-Nova",
+  "ksu_ref": "builtin",
+  "ksu_commit": "4bec532dd447e2852aa8932afa768255350c103a",
+  "susfs_version": "v2.4.x",
+  "manager_pkg": "com.sukisu.nova",
+  "kernel": "5.4.302",
+  "verified_at": "2026-11-24",
+  "status": "baseline"
+}
