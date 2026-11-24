@@ -2452,6 +2452,7 @@ static int watch_one_dir(struct watch_dir *wd)
  * synchronize_srcu on the same SRCU struct, causing a permanent deadlock).
  * Cleanup is deferred to a delayed_work that runs outside the SRCU context.
  */
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
 static int susfs_handle_sdcard_inode_event(struct fsnotify_mark *mark, u32 mask,
 											struct inode *inode, struct inode *dir,
 											const struct qstr *file_name, u32 cookie)
@@ -2472,6 +2473,29 @@ static int susfs_handle_sdcard_inode_event(struct fsnotify_mark *mark, u32 mask,
 static const struct fsnotify_ops fsnotify_ops = {
 	.handle_inode_event = susfs_handle_sdcard_inode_event,
 };
+#else
+static int susfs_handle_sdcard_event(struct fsnotify_group *group,
+				     struct inode *inode, u32 mask, const void *data,
+				     int data_type, const struct qstr *file_name,
+				     u32 cookie, struct fsnotify_iter_info *iter_info)
+{
+	if (!file_name || file_name->len != 7 ||
+	    memcmp(file_name->name, "Android", 7))
+		return 0;
+
+	if (test_and_set_bit(0, &sdcard_cleanup_scheduled))
+		return 0;
+
+	SUSFS_LOGI("'%s' detected, mask: 0x%x\n", SDCARD_ANDROID_PATH, mask);
+	SUSFS_LOGI("deferring cleanup for 5 seconds\n");
+	queue_delayed_work(system_unbound_wq, &sdcard_cleanup_dwork, 5 * HZ);
+	return 0;
+}
+
+static const struct fsnotify_ops fsnotify_ops = {
+	.handle_event = susfs_handle_sdcard_event,
+};
+#endif
 
 static int add_mark_on_inode(struct inode *inode, u32 mask,
 								struct fsnotify_mark **out)
