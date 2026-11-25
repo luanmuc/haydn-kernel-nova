@@ -7,14 +7,14 @@
 ### AnyKernel setup
 properties() { '
 kernel.string=HoshinoNeko Kernel · haydn (K40 Pro/Pro+)
-do.devicecheck=0
+do.devicecheck=1
 do.modules=0
 do.systemless=0
 do.cleanup=1
 do.cleanuponabort=0
-device.name1=
-device.name2=
-device.name3=
+device.name1=haydn
+device.name2=haydnpro
+device.name3=M2012K11C
 device.name4=
 device.name5=
 supported.versions=
@@ -24,7 +24,7 @@ supported.vendorpatchlevels=
 
 ### AnyKernel install
 block=boot
-is_slot_device=auto
+is_slot_device=0
 ramdisk_compression=auto
 patch_vbmeta_flag=auto
 no_magisk_check=1
