@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 校验工作树中的 SUSFS 集成文件是否仍等于 v2.3.0 基线
+# 校验工作树中的 SUSFS 集成文件是否仍等于本地 v2.4.0 基线（不是上游字节锁）
 set -euo pipefail
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)
 cd "$ROOT"
