@@ -3,6 +3,7 @@
 ## 本项目（HoshinoNeko / SM8350）专用模板
 ## 关键前提：SM8350 是 boot image v3（独立 vendor_boot，无 init_boot）
 ##          所以 block=boot；dtb/dtbo 不打包，沿用 ROM 原机 dtbo
+##          haydn 是 A/B：必须让 AK3 识别 boot_a / boot_b，is_slot_device=1
 
 ### AnyKernel setup
 properties() { '
@@ -24,7 +25,7 @@ supported.vendorpatchlevels=
 
 ### AnyKernel install
 block=boot
-is_slot_device=0
+is_slot_device=1
 ramdisk_compression=auto
 patch_vbmeta_flag=auto
 no_magisk_check=1

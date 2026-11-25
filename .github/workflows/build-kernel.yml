@@ -265,6 +265,9 @@ jobs:
           tar -xzf /tmp/ak3.tar.gz -C ak3 --strip-components=1
           cp "out_${DEVICE}/arch/arm64/boot/Image" ak3/Image
           cp scripts/ci/anykernel.sh ak3/anykernel.sh
+          grep -q '^is_slot_device=1$' ak3/anykernel.sh || {
+            echo "ERROR: AnyKernel 模板必须是 A/B（is_slot_device=1），拒绝生成 haydn zip"; exit 1;
+          }
           cd ak3
           zip -r9 "../HoshinoNeko_${DEVICE}_${TAG}_Any3Kernel.zip" . \
               -x '.git*' README.md '*placeholder'

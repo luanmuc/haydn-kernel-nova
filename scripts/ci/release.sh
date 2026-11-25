@@ -156,6 +156,7 @@ esac
 ZIP_SIZE=$(stat -c %s "$ZIP")
 IMAGE_SIZE=$(stat -c %s "$IMAGE")
 [ "$ZIP_SIZE" -gt 0 ] && [ "$IMAGE_SIZE" -gt 0 ] || fail "产物大小为 0"
+unzip -p "$ZIP" anykernel.sh | grep -q '^is_slot_device=1$' || fail "AnyKernel 不是 A/B 版本（is_slot_device!=1），拒绝发布"
 echo "zip: $(basename "$ZIP") ($ZIP_SIZE 字节)"
 echo "Image: $IMAGE_SIZE 字节"
 echo "zip sha256: $(sha256sum "$ZIP" | awk '{print $1}')"

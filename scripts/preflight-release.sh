@@ -19,7 +19,8 @@ ok "zip integrity"
 unzip -p "$pkg" anykernel.sh > "$work/anykernel.sh"
 bash -n "$work/anykernel.sh" || fail "anykernel syntax"
 grep -q '^block=boot$' "$work/anykernel.sh" || fail "AnyKernel block must be boot"
-ok "AnyKernel syntax/block"
+grep -q '^is_slot_device=1$' "$work/anykernel.sh" || fail "AnyKernel must be A/B (is_slot_device=1), got: $(grep '^is_slot_device=' "$work/anykernel.sh" || echo 'missing')"
+ok "AnyKernel syntax/block/A-B slot"
 if grep -q '^do.devicecheck=0$' "$work/anykernel.sh"; then
   echo "WARN: do.devicecheck=0；刷入前必须人工确认设备为 haydn"
 fi
