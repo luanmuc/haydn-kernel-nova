@@ -172,7 +172,7 @@ jobs:
           set -eu
           make -j"$(nproc)" ARCH=arm64 LLVM=1 LLVM_IAS=1 O="out_${DEVICE}" "${DEVICE}_defconfig"
           echo "=== 关键开关核对 ==="
-          grep -E "CONFIG_MACH_XIAOMI_HAYDN|CONFIG_LOCALVERSION=|CONFIG_KSU=|CONFIG_KSU_MULTI_MANAGER_SUPPORT|CONFIG_KSU_SUSFS=|CONFIG_KPM=|CONFIG_LTO_CLANG=|CONFIG_LTO_CLANG_THIN=|CONFIG_MODULES=" "out_${DEVICE}/.config" || true
+          grep -E "CONFIG_MACH_XIAOMI_HAYDN|CONFIG_LOCALVERSION=|CONFIG_KSU=|CONFIG_KSU_MULTI_MANAGER_SUPPORT|CONFIG_KSU_SUSFS=|CONFIG_KPM=|CONFIG_LTO_CLANG=|CONFIG_LTO_CLANG_THIN=|CONFIG_MODULES=|CONFIG_HW_RANDOM=|CONFIG_HW_RANDOM_MSM_LEGACY=" "out_${DEVICE}/.config" || true
           # Nova 的 KSU 依赖 KPROBES；这两个开关没生效时镜像里不会带 root，必须直接失败。
           for sym in CONFIG_KPROBES CONFIG_KSU CONFIG_KSU_SUSFS; do
             if ! grep -q "^${sym}=y$" "out_${DEVICE}/.config"; then
@@ -180,8 +180,22 @@ jobs:
               exit 1
             fi
           done
+          # 云端只编 Image，不编 modules；HWRNG 必须内置，否则 /dev/hwrng 缺失。
+          for sym in CONFIG_HW_RANDOM CONFIG_HW_RANDOM_MSM_LEGACY; do
+            if ! grep -q "^${sym}=y$" "out_${DEVICE}/.config"; then
+              echo "::error::${sym}=y 未生效（云端不编 modules，HWRNG 不会进 Image）"
+              exit 1
+            fi
+          done
           echo "=== 模块型驱动数量（应为 0，全部内置）==="
-          grep -c "=m$" "out_${DEVICE}/.config" || echo 0
+          mods=$(grep -c "=m$" "out_${DEVICE}/.config" || true)
+          mods=${mods:-0}
+          echo "实际 =m 数量: ${mods}"
+          if [ "${mods}" -ne 0 ]; then
+            echo "::error::仍有 ${mods} 个 =m；云端只编 Image，这些驱动不会进镜像"
+            grep "=m$" "out_${DEVICE}/.config" || true
+            exit 1
+          fi
           # .config 是隐藏文件，upload-artifact 默认不收；复制一份非隐藏名，随产物上传
           cp "out_${DEVICE}/.config" "haydn-config-used.txt"
 
