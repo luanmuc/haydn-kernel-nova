@@ -9,13 +9,13 @@
 
 ## 当前状态（2026-11-26）
 
-### Android 14 FCM6 修复候选
+### Android 14 FCM6 正式版（已真机验证）
 
 - 构建提交：`27a492b20c1e9c2b3944dbd9255a4191eb8bfe41`
 - 分支：`haydn/nova-fcm6`
 - 云端 run：`45776535127`（success）
 - Release：https://github.com/luanmuc/haydn-kernel-nova/releases/tag/haydn-27a492b20-fcm6-2026-11-26
-- 状态：构建、FCM6 配置比对、AVB 校验通过；**弹窗/触摸/KSU 真机待验证，不是正式版**
+- 状态：**真机验证通过：开机弹窗消失，触摸、WiFi、相机、通话、充电正常，SukiSU 30007-6 / SUSFS 2.4.0 正常；已发布正式版**
 
 本版从 Android 14 当前主线 `0ce563620` 出发，按设备实际导出的 `compatibility_matrix.6.xml` 一次性补齐 FCM6 缺失的 8 项内核配置：
 
@@ -45,7 +45,7 @@ fastboot boot Nova-haydn-patched-clean-boot-27a492b20-fcm6.img
 
 ## 版本线
 
-- 构建分支：`haydn/nova-fcm6`（FCM6 修复候选）
+- 构建分支：`haydn/nova-fcm6`（FCM6 正式版）
 - 主线分支：`haydn/nova-builtin-new`
 - 默认文档分支：`haydn/nova`
 - KSU：SukiSU-Nova `builtin`，固定 `5a3ec414`
@@ -63,4 +63,4 @@ fastboot boot Nova-haydn-patched-clean-boot-27a492b20-fcm6.img
 ## 注意
 
 - 不要刷 BakaSU 线的包，不要与 BakaSU 管理器混装。
-- FCM6 修复候选尚未真机验证；验证前请保留 `0ce` clean boot 作为回滚底包。
+- FCM6 正式版已完成真机验证；仍建议保留 `0ce` clean boot 作为回滚底包。
