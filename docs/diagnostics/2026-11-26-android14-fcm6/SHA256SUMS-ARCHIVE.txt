@@ -1,4 +1,6 @@
-a297048fec30715cdbc0ca427e856f82143711b3ddb324374dc18b12d04a2c2a  ./artifacts.tsv
+33831bad11e256976f07bcc20e0f15d4385557b2f73bd7f8fe800912f6b0ba6d  ./artifacts.tsv
+28deeebacd9092f858c0fe89a8f5b8a3e1bf5da1dc8d02bc684a295ba6e90cf7  ./build-logs/469.log
+d5b0605df0f50abdeb4e63fc56b456981391ed46180572c5b281669dd381e216  ./build-logs/681.log
 69ae6bd7a0ba20b1e6dcdb395a418939576693935d12b2a3e354e64939879b10  ./build-logs/cfi-off.log
 c991b5fa1ab89497de2f4eb6bd28a1ebf1c7d4acf63cae42425bf9ddd6b58424  ./build-logs/cfi-shadow-off.log
 da04aeaf507a42b17651c3aa65b09f82dcac715384574daf86b737666fa07f50  ./build-logs/nopauth.log
@@ -10,8 +12,11 @@ de2668d4bbc2b5f67ce8006e655e8e75ae56638200dd0f1ca9dbbb7da1832f44  ./build-logs/s
 6ecb6ddcec52e16dec3522e7f3529d2232ce36a0456058460c965eaed346d0ec  ./build-recipe/build-kernel.yml
 45a6520a550552ff506c61aafe2bb5e8b4ed52b84d5338735f702d698756fded  ./configs/0ce-config.txt
 a0c1d4ee8cdedee4e7eb4d84d1f4214e6ef3042f5440fee1abb73f04c71144ab  ./configs/469-config.txt
+d8f6c04db8b6b4ac826d9d2f59005468d6ee3b8341173512695ac33520cc3ad5  ./configs/681-config.txt
 151975d347284379b276df776649a120b2d47a897c4a2adb7046934c5cebcbea  ./configs/nopauth-config.txt
-383be5050275112f5edf016c09ba607b95e1038df6fcefce277c094618e86604  ./README.md
+663996eb1333e561dddb521c80253ea9e8c3754b22ca5ef19d6f6a91e00e264d  ./README.md
+d2c9c2a862659f7993ce52965adcfab5cbe12ded5e1d2098113bb855c8efa280  ./reference/469-README.md
+f8d95c4cfb93081e4d4f62bbcd82a88cf0d7343d3768cf2b784ed8e855f321d6  ./reference/681-README.md
 334d47ee276853059911dfe265f3e645a5fb3d309acab01ff98b8e10911cf93e  ./reference/compatibility_matrix.6.xml
 45a6520a550552ff506c61aafe2bb5e8b4ed52b84d5338735f702d698756fded  ./reference/current-config.txt
 2f22b28ea4dbfbe4df42c8b6437bb6b685f2103477f42dc6292de20ca022ce2f  ./SHA256SUMS-ALL.txt

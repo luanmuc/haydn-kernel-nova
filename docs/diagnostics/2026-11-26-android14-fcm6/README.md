@@ -54,7 +54,7 @@
 
 这些包只适合作为 Android 13/FCM5 的触摸变量对照，不再作为 Android 14 的候选。
 
-## 7 个 artifact 清单
+## 测试 artifact 清单
 
 完整机器可读清单见 `artifacts.tsv`。
 
@@ -67,16 +67,19 @@
 | 45719834851 | cfi-off | 15073166231 | 已删除 |
 | 45719834851 | sw-off | 15072541776 | 已删除 |
 | 45665278740 | no-PAuth | 15048776679 | 已删除 |
+| 45654852987 | 469 | 15044484079 | 已删除 |
+| 45641508472 | 681 | 15037618111 | 已删除 |
 
-云端临时分支 `haydn/nova-vintf-matrix` 已删除，分支 tip 为 `c1dc25ce10be2ba983a0a3f81a269f32982f6543`。
+云端临时分支 `haydn/nova-vintf-matrix` 已删除，分支 tip 为 `c1dc25ce10be2ba983a0a3f81a269f32982f6543`。  
+旧诊断分支 `haydn/nova-vintf-fix`、`haydn/nova-vintf-fix-diag`、`haydn/nova-vintf-diag-nopauth` 也已删除；469 和 681 的旧 artifacts 一并删除。
 
 ## 归档内容
 
 - `TEST-PLAN.md`：原 7 包测试单，仅作历史记录，不再作为 Android 14 测试计划。
 - `SHA256SUMS-ALL.txt`：7 个 clean boot 的原始校验和。
-- `configs/`：0ce、469、no-PAuth 三份关键 config。
-- `build-logs/`：7 个变体的构建日志。
-- `reference/`：当前系统上传的 `compatibility_matrix.6.xml` 与 `current-config.txt`。
+- `configs/`：0ce、469、681、no-PAuth 四份关键 config。
+- `build-logs/`：7 个矩阵变体 + 469 + 681 的构建日志。
+- `reference/`：当前系统上传的 `compatibility_matrix.6.xml`、`current-config.txt`，以及 469/681 的 README。
 - `build-recipe/`：原矩阵 workflow 与 `apply-variant.py`，仅作复现参考，不参与当前主线构建。
 - `artifacts.tsv`：7 个 Actions artifact 的 id、名称、大小。
 
@@ -87,7 +90,9 @@
 - 本地 `matrix-45719834851/`（约 1.9 GB）已删除。
 - 本地 `Nova-haydn-7-test-2026-11-26.zip`（约 303 MB）已删除。
 - 云端 `haydn/nova-vintf-matrix` 分支已删除。
+- 旧诊断分支 `haydn/nova-vintf-fix`、`haydn/nova-vintf-fix-diag`、`haydn/nova-vintf-diag-nopauth` 已删除。
 - 云端 7 个测试 artifact 已删除（run `45719834851` 六个 + run `45665278740` 一个）。
+- 469 的 artifact `15044484079`、681 的 artifact `15037618111` 已删除。
 - `0ce563620` 正式 Release、clean boot、AnyKernel、config 均保留，作为当前可用基线。
 
 ## 后续方向
