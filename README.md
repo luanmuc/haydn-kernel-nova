@@ -46,7 +46,6 @@ fastboot boot Nova-haydn-patched-clean-boot-27a492b20-fcm6.img
 ## 版本线
 
 - 主线分支：`haydn/nova-builtin-new`（FCM6 正式版）
-- 主线分支：`haydn/nova-builtin-new`
 - 默认文档分支：`haydn/nova`
 - KSU：SukiSU-Nova `builtin`，固定 `5a3ec414`
 - SUSFS：`v2.4.0`（GKI 5.10 核心移植到 5.4）
