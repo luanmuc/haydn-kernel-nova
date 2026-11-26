@@ -706,6 +706,11 @@ config HAVE_MOVE_PMD
 	help
 	  Archs that select this are able to move page tables at the PMD level.
 
+config HAVE_MOVE_PUD
+	bool
+	help
+	  Archs that select this are able to move page tables at the PUD level.
+
 config HAVE_ARCH_TRANSPARENT_HUGEPAGE
 	bool
 

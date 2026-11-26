@@ -196,6 +196,22 @@ jobs:
             grep "=m$" "out_${DEVICE}/.config" || true
             exit 1
           fi
+          # Android 14 FCM6 的 8 项内核配置必须全部落地，否则开机会弹
+          # “您的设备内部出现了问题”。任一缺失直接失败，避免产出假修复包。
+          for sym in \
+            CONFIG_ARM64_SW_TTBR0_PAN \
+            CONFIG_SHADOW_CALL_STACK \
+            CONFIG_CFI_CLANG \
+            CONFIG_HAVE_MOVE_PMD \
+            CONFIG_HAVE_MOVE_PUD \
+            CONFIG_CRYPTO_CHACHA20POLY1305 \
+            CONFIG_CRYPTO_XCBC \
+            CONFIG_XFRM_MIGRATE; do
+            if ! grep -q "^${sym}=y$" "out_${DEVICE}/.config"; then
+              echo "::error::${sym}=y 未生效（Android 14 FCM6 必需）"
+              exit 1
+            fi
+          done
           # .config 是隐藏文件，upload-artifact 默认不收；复制一份非隐藏名，随产物上传
           cp "out_${DEVICE}/.config" "haydn-config-used.txt"
 
