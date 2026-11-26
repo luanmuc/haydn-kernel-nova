@@ -14,9 +14,11 @@ de2668d4bbc2b5f67ce8006e655e8e75ae56638200dd0f1ca9dbbb7da1832f44  ./build-logs/s
 a0c1d4ee8cdedee4e7eb4d84d1f4214e6ef3042f5440fee1abb73f04c71144ab  ./configs/469-config.txt
 d8f6c04db8b6b4ac826d9d2f59005468d6ee3b8341173512695ac33520cc3ad5  ./configs/681-config.txt
 151975d347284379b276df776649a120b2d47a897c4a2adb7046934c5cebcbea  ./configs/nopauth-config.txt
-663996eb1333e561dddb521c80253ea9e8c3754b22ca5ef19d6f6a91e00e264d  ./README.md
+8989968abfe064b28bfab2c2c1e1223fc138acbfeb6504e20f0cc1a6a1ca06e9  ./README.md
 d2c9c2a862659f7993ce52965adcfab5cbe12ded5e1d2098113bb855c8efa280  ./reference/469-README.md
+692aaac167a787295afff60ed00db62f545c6c96377e9d27419c6064ce24c2a7  ./reference/469-SHA256SUMS.txt
 f8d95c4cfb93081e4d4f62bbcd82a88cf0d7343d3768cf2b784ed8e855f321d6  ./reference/681-README.md
+fe3d44375e38f9a473fe5f7b99aadfb66ca767b0c825e497069311b8ade2b36d  ./reference/681-SHA256SUMS.txt
 334d47ee276853059911dfe265f3e645a5fb3d309acab01ff98b8e10911cf93e  ./reference/compatibility_matrix.6.xml
 45a6520a550552ff506c61aafe2bb5e8b4ed52b84d5338735f702d698756fded  ./reference/current-config.txt
 2f22b28ea4dbfbe4df42c8b6437bb6b685f2103477f42dc6292de20ca022ce2f  ./SHA256SUMS-ALL.txt

@@ -79,7 +79,7 @@
 - `SHA256SUMS-ALL.txt`：7 个 clean boot 的原始校验和。
 - `configs/`：0ce、469、681、no-PAuth 四份关键 config。
 - `build-logs/`：7 个矩阵变体 + 469 + 681 的构建日志。
-- `reference/`：当前系统上传的 `compatibility_matrix.6.xml`、`current-config.txt`，以及 469/681 的 README。
+- `reference/`：当前系统上传的 `compatibility_matrix.6.xml`、`current-config.txt`，以及 469/681 的 README 和 SHA256SUMS。
 - `build-recipe/`：原矩阵 workflow 与 `apply-variant.py`，仅作复现参考，不参与当前主线构建。
 - `artifacts.tsv`：7 个 Actions artifact 的 id、名称、大小。
 
@@ -89,6 +89,7 @@
 
 - 本地 `matrix-45719834851/`（约 1.9 GB）已删除。
 - 本地 `Nova-haydn-7-test-2026-11-26.zip`（约 303 MB）已删除。
+- 本地 `vintf-fix-diag-469e7e420/`（约 271 MB）和 `vintf-fix-681c358a/`（约 269 MB）已删除，仅保留 config、build log、README、SHA256SUMS。
 - 云端 `haydn/nova-vintf-matrix` 分支已删除。
 - 旧诊断分支 `haydn/nova-vintf-fix`、`haydn/nova-vintf-fix-diag`、`haydn/nova-vintf-diag-nopauth` 已删除。
 - 云端 7 个测试 artifact 已删除（run `45719834851` 六个 + run `45665278740` 一个）。
