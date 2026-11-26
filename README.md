@@ -12,7 +12,7 @@
 ### Android 14 FCM6 正式版（已真机验证）
 
 - 构建提交：`27a492b20c1e9c2b3944dbd9255a4191eb8bfe41`
-- 分支：`haydn/nova-fcm6`
+- 主线：`haydn/nova-builtin-new`（FCM6 已合入）
 - 云端 run：`45776535127`（success）
 - Release：https://github.com/luanmuc/haydn-kernel-nova/releases/tag/haydn-27a492b20-fcm6-2026-11-26
 - 状态：**真机验证通过：开机弹窗消失，触摸、WiFi、相机、通话、充电正常，SukiSU 30007-6 / SUSFS 2.4.0 正常；已发布正式版**
@@ -45,7 +45,7 @@ fastboot boot Nova-haydn-patched-clean-boot-27a492b20-fcm6.img
 
 ## 版本线
 
-- 构建分支：`haydn/nova-fcm6`（FCM6 正式版）
+- 主线分支：`haydn/nova-builtin-new`（FCM6 正式版）
 - 主线分支：`haydn/nova-builtin-new`
 - 默认文档分支：`haydn/nova`
 - KSU：SukiSU-Nova `builtin`，固定 `5a3ec414`
