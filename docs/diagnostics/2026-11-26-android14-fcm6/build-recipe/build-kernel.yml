@@ -1,0 +1,364 @@
+# 只编 haydn（Redmi K40 Pro / K40 Pro+）的 boot Image，并打成 AnyKernel3 可刷包
+# 手动触发，无输入项：Actions 页面点一次 Run workflow 即可
+name: Build Kernel · haydn (K40 Pro/Pro+)
+
+"on":
+  workflow_dispatch:
+  push:
+    branches:
+      - haydn/nova-builtin-new
+
+permissions:
+  contents: read
+
+# 同一时间只允许一个构建，新的会取消旧的，避免两个 run 互相抢 cache
+concurrency:
+  group: build-haydn
+  cancel-in-progress: true
+
+env:
+  DEVICE: haydn
+  CLANG_VERSION: "18.1.8"
+  AK3_COMMIT: "41f04bdb4ee30a44e429c2c1131d5e8bb32b15f1"
+  CLANG_URL: "https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.8/clang+llvm-18.1.8-x86_64-linux-gnu-ubuntu-18.04.tar.xz"
+
+  # ---- ccache 调优：命中率优先 ----
+  CCACHE_MAXSIZE: "3G"
+  CCACHE_COMPRESS: "true"
+  CCACHE_COMPRESSLEVEL: "1"
+  # depend mode：跳过重复预处理，命中判定更快（内核用 -Wp,-MD，兼容）
+  CCACHE_DEPEND: "true"
+  # 内核里有 __DATE__/__TIME__、且每次 checkout 都是新 mtime；
+  # 放开这几项 sloppiness，命中率才上得来（内容仍然参与哈希，不会算错）
+  CCACHE_SLOPPINESS: "time_macros,include_file_mtime,include_file_ctime"
+  CCACHE_NOHASHDIR: "true"
+  CCACHE_COMPILERCHECK: "%compiler% -dumpmachine; %compiler% -dumpversion"
+
+jobs:
+  build:
+    name: "haydn · HoshinoNeko · ${{ matrix.variant }}"
+    runs-on: ubuntu-22.04
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - variant: strict-pauth
+          - variant: scs-vmap-off
+          - variant: cfi-shadow-off
+          - variant: scs-off
+          - variant: cfi-off
+          - variant: sw-off
+    env:
+      VARIANT: ${{ matrix.variant }}
+
+    steps:
+      - name: "1) 检出仓库（含 KernelSU 子模块，浅克隆）"
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 1
+
+      - name: "1a) 应用 Nova 5.4 兼容补丁"
+        run: |
+          set -eu
+          chmod +x scripts/apply-nova-patches.sh
+          ./scripts/apply-nova-patches.sh
+
+      - name: "1b) 快速自检：KSU 子模块必须就位"
+        run: |
+          set -eu
+          test -f KernelSU/kernel/Kconfig || {
+            echo "::error::KernelSU 子模块为空。本仓库 drivers/kernelsu 是指向 ../KernelSU/kernel 的符号链接，"
+            echo "::error::CONFIG_KSU=y 时必须有源码，请确认 checkout 的 submodules: recursive 生效。"
+            exit 1
+          }
+          ls -ld drivers/kernelsu
+          echo "KSU 子模块 OK"
+
+      - name: "1b2) 补全 KSU 子模块历史（版本号=30700+提交数，浅克隆会算成 1）"
+        run: |
+          set -eu
+          if [ "$(git -C KernelSU rev-parse --is-shallow-repository)" = "true" ]; then
+            echo "子模块是浅克隆 -> 补全历史与 tag"
+            git -C KernelSU fetch --unshallow --tags origin
+          else
+            echo "子模块已是完整历史"
+          fi
+          git -C KernelSU fetch --tags origin || true
+          echo "KSU 提交数: $(git -C KernelSU rev-list --count HEAD)"
+          git -C KernelSU describe --tags --always
+
+      - name: "1c) 环境快照（出问题时先看这里）"
+        run: |
+          set -eu
+          {
+            echo "=== 系统 ==="; uname -a
+            echo "=== CPU/内存 ==="; nproc; free -m
+            echo "=== 磁盘 ==="; df -h /
+            echo "=== 编译期主机工具 ==="
+            gcc --version | head -1 || true
+            make --version | head -1 || true
+            python3 --version || true
+            ccache --version | head -1 || true
+            echo "=== 仓库状态 ==="
+            git log -1 --oneline
+            git describe --tags --always || true
+            git submodule status
+            echo "=== 磁盘占用 ==="; du -sh . 2>/dev/null || true
+          }
+
+      - name: "1d) 应用诊断变体"
+        run: |
+          set -eu
+          python3 scripts/ci/apply-variant.py "${VARIANT}"
+          echo "=== 变体 ${VARIANT} 的关键开关 ==="
+          grep -nE "CONFIG_(CFI_CLANG|CFI_CLANG_SHADOW|CFI_PERMISSIVE|SHADOW_CALL_STACK|SHADOW_CALL_STACK_VMAP|ARM64_SW_TTBR0_PAN|ARM64_PTR_AUTH)=" arch/arm64/configs/haydn_defconfig || true
+
+      - name: "2) 释放磁盘空间"
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc \
+                      /usr/local/share/boost /usr/share/swift \
+                      /opt/hostedtoolcache/CodeQL || true
+          df -h /
+
+      - name: "3) 安装主机依赖（优先用 runner 自带 apt 索引，失败再 update）"
+        run: |
+          set -eu
+          PKGS="bc bison flex libssl-dev libelf-dev cpio rsync zip unzip ccache libtinfo5 libncurses5"
+          if sudo apt-get install -y --no-install-recommends $PKGS; then
+            echo "直接安装成功（未跑 apt-get update）"
+          else
+            echo "索引缺失，执行 apt-get update 后重试"
+            sudo apt-get update
+            sudo apt-get install -y --no-install-recommends $PKGS
+          fi
+          bc --version | head -1
+          ccache --version | head -1
+
+      - name: "4) 恢复 Clang 工具链缓存"
+        id: clang-cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/clang-${{ env.CLANG_VERSION }}
+          key: clang-${{ env.CLANG_VERSION }}-ubuntu2204-v2
+
+      - name: "5) 未命中则下载解压 Clang（约 996MB / 解压 7.1GB）"
+        if: steps.clang-cache.outputs.cache-hit != 'true'
+        run: |
+          set -eu
+          cd "${{ runner.temp }}"
+          curl -fL --retry 3 --retry-delay 2 -o clang.tar.xz "$CLANG_URL"
+          mkdir -p "clang-${CLANG_VERSION}"
+          tar -xf clang.tar.xz -C "clang-${CLANG_VERSION}" --strip-components=1
+          rm -f clang.tar.xz
+
+      - name: "6) 工具链入 PATH 并校验版本"
+        run: |
+          set -eu
+          echo "${{ runner.temp }}/clang-${CLANG_VERSION}/bin" >> "$GITHUB_PATH"
+          export PATH="${{ runner.temp }}/clang-${CLANG_VERSION}/bin:$PATH"
+          clang --version
+          ld.lld --version
+          llvm-ar --version | head -2
+          test "$(clang --version | head -1 | grep -o '18\.1\.8')" = "18.1.8" || {
+            echo "::error::Clang 版本不是 18.1.8，内核会编不过"
+            exit 1
+          }
+
+      - name: "7) 恢复 ccache（按 run 唯一 key，前缀回退到最近一次）"
+        id: ccache-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/ccache
+          key: ccache-${{ env.DEVICE }}-${{ env.VARIANT }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            ccache-${{ env.DEVICE }}-${{ env.VARIANT }}-
+            ccache-${{ env.DEVICE }}-
+
+      - name: "8) ccache 初始化（写入 CCACHE_DIR，清零统计，打印暖机状态）"
+        run: |
+          set -eu
+          CCACHE_DIR="${{ runner.temp }}/ccache"
+          mkdir -p "$CCACHE_DIR"
+          echo "CCACHE_DIR=$CCACHE_DIR" >> "$GITHUB_ENV"
+          ccache -z
+          echo "=== 恢复后的 ccache 状态 ==="
+          ccache -s || true
+          du -sm "$CCACHE_DIR" || true
+
+      - name: "9) 生成 haydn defconfig 并核对关键开关"
+        run: |
+          set -eu
+          make -j"$(nproc)" ARCH=arm64 LLVM=1 LLVM_IAS=1 O="out_${DEVICE}" "${DEVICE}_defconfig"
+          echo "=== 关键开关核对 ==="
+          grep -E "CONFIG_MACH_XIAOMI_HAYDN|CONFIG_LOCALVERSION=|CONFIG_KSU=|CONFIG_KSU_MULTI_MANAGER_SUPPORT|CONFIG_KSU_SUSFS=|CONFIG_KPM=|CONFIG_LTO_CLANG=|CONFIG_LTO_CLANG_THIN=|CONFIG_MODULES=|CONFIG_HW_RANDOM=|CONFIG_HW_RANDOM_MSM_LEGACY=" "out_${DEVICE}/.config" || true
+          # Nova 的 KSU 依赖 KPROBES；这两个开关没生效时镜像里不会带 root，必须直接失败。
+          for sym in CONFIG_KPROBES CONFIG_KSU CONFIG_KSU_SUSFS; do
+            if ! grep -q "^${sym}=y$" "out_${DEVICE}/.config"; then
+              echo "::error::${sym}=y 未生效（Nova 需要 CONFIG_KPROBES && CONFIG_EXT4_FS，检查 defconfig 依赖）"
+              exit 1
+            fi
+          done
+          # 云端只编 Image，不编 modules；HWRNG 必须内置，否则 /dev/hwrng 缺失。
+          for sym in CONFIG_HW_RANDOM CONFIG_HW_RANDOM_MSM_LEGACY; do
+            if ! grep -q "^${sym}=y$" "out_${DEVICE}/.config"; then
+              echo "::error::${sym}=y 未生效（云端不编 modules，HWRNG 不会进 Image）"
+              exit 1
+            fi
+          done
+          echo "=== 模块型驱动数量（应为 0，全部内置）==="
+          mods=$(grep -c "=m$" "out_${DEVICE}/.config" || true)
+          mods=${mods:-0}
+          echo "实际 =m 数量: ${mods}"
+          if [ "${mods}" -ne 0 ]; then
+            echo "::error::仍有 ${mods} 个 =m；云端只编 Image，这些驱动不会进镜像"
+            grep "=m$" "out_${DEVICE}/.config" || true
+            exit 1
+          fi
+          # .config 是隐藏文件，upload-artifact 默认不收；复制一份非隐藏名，随产物上传
+          cp "out_${DEVICE}/.config" "haydn-config-used-${VARIANT}.txt"
+
+      - name: "10) 编译 Image（ccache 加速，仅 Image，不编 modules）"
+        id: build
+        run: |
+          set -o pipefail
+          echo "并行度: $(nproc) 核"
+          set +e
+          /usr/bin/time -v make -j"$(nproc)" ARCH=arm64 LLVM=1 LLVM_IAS=1 \
+              CC="ccache clang" O="out_${DEVICE}" Image 2>&1 | tee build.log
+          RC=${PIPESTATUS[0]}
+          set -e
+          echo "make 退出码: ${RC}"
+          if [ "${RC}" -ne 0 ]; then
+            echo "::error::内核编译失败（make 退出码 ${RC}），完整日志见 build.log 产物"
+            exit "${RC}"
+          fi
+          ls -lh "out_${DEVICE}/arch/arm64/boot/Image"
+          file "out_${DEVICE}/arch/arm64/boot/Image"
+
+      - name: "10b) 日志分级（真实 error / 编译 warning / 已知噪音）"
+        if: always()
+        run: |
+          if [ -f build.log ]; then
+            python3 scripts/ci/classify-build-log.py build.log --summary | tee -a "$GITHUB_STEP_SUMMARY"
+          else
+            {
+              echo ""
+              echo "## 构建日志分级"
+              echo ""
+              echo "没有 build.log：失败发生在编译步骤之前，请看各步骤自身日志。"
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: "11) ccache 命中统计"
+        if: always()
+        run: |
+          echo "=== 本次构建 ccache 统计 ==="
+          ccache -s || true
+
+      - name: "12) 统计 ccache 体积"
+        id: ccache-size
+        if: always()
+        run: |
+          SIZE=$(du -sm "${{ runner.temp }}/ccache" 2>/dev/null | awk '{print $1}')
+          [ -z "$SIZE" ] && SIZE=0
+          echo "size=$SIZE" >> "$GITHUB_OUTPUT"
+          echo "ccache 体积: ${SIZE} MB"
+
+      - name: "13) 保存 ccache（仅编译成功且体积 >= 20MB 才写；失败轮不污染最新缓存）"
+        if: success() && fromJSON(steps.ccache-size.outputs.size) >= 20
+        continue-on-error: true
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ runner.temp }}/ccache
+          key: ccache-${{ env.DEVICE }}-${{ github.run_id }}-${{ github.run_attempt }}
+
+      - name: "13b) 恢复 AnyKernel3 源码缓存"
+        if: success()
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/ak3-${{ env.AK3_COMMIT }}
+          key: ak3-${{ env.AK3_COMMIT }}
+
+      - name: "14) 打包 AnyKernel3（只含 Image，dtb/dtbo 沿用 ROM 原机）"
+        if: success()
+        run: |
+          set -eu
+          TAG="$(git rev-parse --short HEAD)"
+          # AnyKernel3 锁 commit，第一次下载后进 Actions 缓存，后续不再重复 curl
+          AK3_CACHE="${{ runner.temp }}/ak3-${AK3_COMMIT}"
+          if [ ! -f "$AK3_CACHE/anykernel.sh" ]; then
+            curl -fL --retry 3 "https://github.com/osm0sis/AnyKernel3/archive/${AK3_COMMIT}.tar.gz" -o /tmp/ak3.tar.gz
+            mkdir -p "$AK3_CACHE"
+            tar -xzf /tmp/ak3.tar.gz -C "$AK3_CACHE" --strip-components=1
+          fi
+          rm -rf ak3
+          cp -a "$AK3_CACHE" ak3
+          cp "out_${DEVICE}/arch/arm64/boot/Image" ak3/Image
+          cp scripts/ci/anykernel.sh ak3/anykernel.sh
+          cd ak3
+          zip -r9 "../HoshinoNeko_${DEVICE}_${TAG}_${VARIANT}_Any3Kernel.zip" . \
+              -x '.git*' README.md '*placeholder'
+          cd ..
+          ls -lh "HoshinoNeko_${DEVICE}_${TAG}_${VARIANT}_Any3Kernel.zip"
+          unzip -l "HoshinoNeko_${DEVICE}_${TAG}_${VARIANT}_Any3Kernel.zip" | head -25
+
+      - name: "15) 写 Step Summary"
+        if: always()
+        run: |
+          {
+            echo "## haydn 构建结果"
+            echo ""
+            echo "| 项 | 值 |"
+            echo "|---|---|"
+            echo "| 机型 | ${DEVICE}（K40 Pro / K40 Pro+） |"
+            echo "| 变体 | ${VARIANT} |"
+            echo "| 提交 | ${GITHUB_SHA} |"
+            echo "| Clang | ${CLANG_VERSION} |"
+            if [ -f "out_${DEVICE}/arch/arm64/boot/Image" ]; then
+              echo "| Image | $(stat -c %s "out_${DEVICE}/arch/arm64/boot/Image") 字节 |"
+            else
+              echo "| Image | 未生成 |"
+            fi
+            if ls HoshinoNeko_*.zip >/dev/null 2>&1; then
+              echo "| AnyKernel zip | $(ls -1 HoshinoNeko_*.zip | head -1) |"
+            fi
+            echo "| ccache | $(du -sm "${{ runner.temp }}/ccache" 2>/dev/null | awk '{print $1}') MB |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: "15b) 失败诊断（自动摘出错误行，直接写进 Actions 页面）"
+        if: failure()
+        run: |
+          {
+            echo ""
+            echo "## 编译失败诊断"
+            echo ""
+            if [ -f build.log ]; then
+              echo "### 错误行（前 60 条，已排除已知噪音）"
+              echo '```'
+              python3 scripts/ci/classify-build-log.py build.log --errors --plain --max 60
+              echo '```'
+              echo ""
+              echo "### 日志末尾 100 行"
+              echo '```'
+              tail -n 100 build.log
+              echo '```'
+            else
+              echo "没有 build.log —— 失败发生在编译之前，请看上面各步骤自己的日志。"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: "16) 上传产物（失败也传日志，方便定位）"
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: HoshinoNeko-haydn-${{ matrix.variant }}-${{ github.sha }}
+          retention-days: 14
+          if-no-files-found: warn
+          path: |
+            out_haydn/arch/arm64/boot/Image
+            out_haydn/.config
+            haydn-config-used-${VARIANT}.txt
+            HoshinoNeko_*.zip
+            build.log
