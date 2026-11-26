@@ -37,11 +37,11 @@ fastboot boot Nova-haydn-patched-clean-boot-27a492b20-fcm6.img
 
 `fastboot boot` 不改 boot 分区；clean boot 以 `0ce` clean boot 为底，仅替换 kernel，KSU ramdisk 沿用当前可工作的那套。
 
-### FCM5 回滚基线
+### Android 14 FCM6 弹窗回滚基线（0ce563620）
 
 - `0ce563620`：`haydn/nova-builtin-new`
 - Release：https://github.com/luanmuc/haydn-kernel-nova/releases/tag/haydn-0ce563620-official-2026-11-26
-- 状态：SukiSU 可工作的稳定基线；仍是 FCM5，仍会有“您的设备内部出现了问题”弹窗，保留用于回滚和对照
+- 状态：SukiSU 可工作的稳定基线；当前 Android 14 / FCM6，仍缺 8 项配置，仍会有“您的设备内部出现了问题”弹窗，保留用于回滚和对照
 
 ## 版本线
 
