@@ -216,6 +216,20 @@ jobs:
           # .config 是隐藏文件，upload-artifact 默认不收；复制一份非隐藏名，随产物上传
           cp "out_${DEVICE}/.config" "haydn-config-used.txt"
 
+      - name: "9a) 只关闭可选内核日志（统计类驱动保持官方默认）"
+        run: |
+          set -eu
+          CFG="out_${DEVICE}/.config"
+          # 只处理日志，不动 THERMAL_STATISTICS / QTI_* / QCOM_* 统计开关
+          scripts/config --file "$CFG" --enable KSU_NOPRINTK
+          scripts/config --file "$CFG" --disable KSU_SUSFS_ENABLE_LOG
+          scripts/config --file "$CFG" --disable PRINT_SUSPEND_EPOCH_QGKI
+          scripts/config --file "$CFG" --disable PRINTK_TIME
+          scripts/config --file "$CFG" --disable PRINTK_CALLER
+          echo "=== 日志开关核对（统计项保持默认） ==="
+          grep -E "CONFIG_(KSU_NOPRINTK|KSU_SUSFS_ENABLE_LOG|PRINT_SUSPEND_EPOCH_QGKI|PRINTK_TIME|PRINTK_CALLER)" "$CFG" || true
+          cp "$CFG" "haydn-config-used.txt"
+
       - name: "10) 编译 Image（ccache 加速，仅 Image，不编 modules）"
         id: build
         run: |
