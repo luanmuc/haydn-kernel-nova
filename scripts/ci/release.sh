@@ -9,6 +9,7 @@
 #   WORK_ROOT=/path        工作区根（默认：当前目录含 PROGRESS.md + repo/，否则仓库根）
 #   REPO=owner/repo         覆盖仓库（默认本 fork）
 #   GITHUB_TOKEN=...        覆盖令牌（默认只从 ~/.git-credentials 读取）
+#   RELEASE_ASSETS_DIR=/path 额外资产目录；设置后统一上传其中文件
 #   DRY_RUN=1               只做校验，不创建 Release、不上传资产
 #
 # 硬校验：
@@ -23,7 +24,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 REPO="${REPO:-luanmuc/haydn-kernel-nova}"
 
 usage() {
-  sed -n '2,18p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+  sed -n '2,19p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
 }
 
 if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
@@ -52,6 +53,7 @@ RUN_ID="${RUN_ID:-$(cat "$WORK_ROOT/tmp/ci-run-id.txt" 2>/dev/null || true)}"
 DRY_RUN="${DRY_RUN:-0}"
 OUT_DIR="$WORK_ROOT/tmp/release"
 API="https://api.github.com/repos/$REPO"
+UPLOAD_API="https://uploads.github.com/repos/$REPO"
 
 fail() { echo "错误: $*" >&2; exit 1; }
 
@@ -190,10 +192,10 @@ echo "release: $RELEASE_URL"
 
 echo "=== 5) 上传资产 ==="
 ASSET_NAME=$(basename "$ZIP")
-HTTP=$(curl -sS -o "$OUT_DIR/asset.json" -w "%{http_code}" \
+HTTP=$(curl --http1.1 -sS -o "$OUT_DIR/asset.json" -w "%{http_code}" \
   -X POST -H "Authorization: token $TOKEN" -H "Content-Type: application/zip" \
   --data-binary @"$ZIP" \
-  "$API/releases/$RID/assets?name=$(python3 -c "import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1]))" "$ASSET_NAME")")
+  "$UPLOAD_API/releases/$RID/assets?name=$(python3 -c "import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1]))" "$ASSET_NAME")")
 [ "$HTTP" = "201" ] || fail "上传资产失败（HTTP $HTTP）"
 python3 - "$OUT_DIR/asset.json" "$ZIP_SIZE" <<'PY'
 import json,sys
@@ -203,5 +205,11 @@ if int(d.get("size",-1)) != size:
     raise SystemExit(f"上传后大小不一致: 远端 {d.get('size')} / 本地 {size}")
 print("asset:", d["name"], d["size"], d["browser_download_url"])
 PY
+
+if [ -n "${RELEASE_ASSETS_DIR:-}" ]; then
+  [ -d "$RELEASE_ASSETS_DIR" ] || fail "RELEASE_ASSETS_DIR 不存在: $RELEASE_ASSETS_DIR"
+  echo "=== 6) 上传额外资产 ==="
+  GITHUB_TOKEN="$TOKEN" REPO="$REPO" bash "$REPO_ROOT/scripts/ci/upload-release-assets.sh" "$RID" "$RELEASE_ASSETS_DIR"
+fi
 
 echo "=== 完成：$RELEASE_URL ==="
