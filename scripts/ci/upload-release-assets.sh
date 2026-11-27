@@ -68,6 +68,7 @@ while IFS= read -r -d '' file; do
     *.md) ctype="text/markdown" ;;
     *.txt|*.log) ctype="text/plain" ;;
     *.img|*.bin|Image-*) ctype="application/octet-stream" ;;
+    *.apk) ctype="application/vnd.android.package-archive" ;;
     *.zip) ctype="application/zip" ;;
     *) ctype="application/octet-stream" ;;
   esac

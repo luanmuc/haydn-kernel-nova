@@ -15,7 +15,7 @@
 - 管理器：`com.sukisu.nova`
 - 适用设备：Redmi K40 Pro / Pro+（haydn）
 - 当前正式版：`07e07dff3` / run `45918531589`（success，[Release](https://github.com/luanmuc/haydn-kernel-nova/releases/tag/haydn-07e07dff3-official-2026-11-27)）
-- 正式发布资产：AK3、clean boot（临时 `fastboot boot` / 可永久刷入）、stock boot（原 ramdisk 备选）、Image、config、build log、发布说明、`SHA256SUMS`
+- 正式发布资产：AK3、clean boot（临时 `fastboot boot` / 可永久刷入）、SukiSU Nova 上游配套 APK（arm64-v8a）、Image、config、build log、发布说明、`SHA256SUMS`
 - 发布标准：[`docs/RELEASE-STANDARD.md`](docs/RELEASE-STANDARD.md)
 - 禁止：不要刷 BakaSU 线的包，不要与 BakaSU 管理器混装
 
