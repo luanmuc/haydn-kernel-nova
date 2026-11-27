@@ -13,6 +13,9 @@ patches:
     status: active
     upstream_status: not-fixed
     checked_against: 5a3ec4145059ed2c4f22c70a16a28a616e104c33
+    build_run: "45918531589"
+    device_verified_at: "2026-11-27"
+    device_verified_kernel: "5.4.302-HoshinoNeko-nova-g07e07dff"
     reason: >-
       CONFIG_KSU_SUSFS_INLINE_HOOK 路径下，input.c 无条件调用
       ksu_handle_input_handle_event()；停止 input hook 后 handler 仍会累计
