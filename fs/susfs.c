@@ -45,6 +45,8 @@ DEFINE_STATIC_KEY_TRUE(susfs_is_log_enabled);
 #else
 #define SUSFS_LOGI(fmt, ...) 
 #define SUSFS_LOGE(fmt, ...) 
+#define SUSFS_LOGI_RL(fmt, ...) 
+#define SUSFS_LOGE_RL(fmt, ...) 
 #endif
 
 /* selinux hide */
