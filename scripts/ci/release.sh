@@ -20,7 +20,7 @@ set -euo pipefail
 umask 077
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-REPO="${REPO:-luanmuc/android_kernel_xiaomi_sm8350_miyume}"
+REPO="${REPO:-luanmuc/haydn-kernel-nova}"
 
 usage() {
   sed -n '2,18p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
@@ -156,7 +156,12 @@ esac
 ZIP_SIZE=$(stat -c %s "$ZIP")
 IMAGE_SIZE=$(stat -c %s "$IMAGE")
 [ "$ZIP_SIZE" -gt 0 ] && [ "$IMAGE_SIZE" -gt 0 ] || fail "产物大小为 0"
-unzip -p "$ZIP" anykernel.sh | grep -q '^is_slot_device=1$' || fail "AnyKernel 不是 A/B 版本（is_slot_device!=1），拒绝发布"
+AK_SCRIPT="$(unzip -p "$ZIP" anykernel.sh | tr -d '\r')"
+grep -qE '^BLOCK=\$block$' <<<"$AK_SCRIPT" || fail "AnyKernel 未显式设置 BLOCK=\$block，拒绝发布"
+grep -qE '^IS_SLOT_DEVICE=0$' <<<"$AK_SCRIPT" || fail "AnyKernel 未设置 IS_SLOT_DEVICE=0，拒绝发布"
+if grep -qE '^(is_slot_device|ramdisk_compression|patch_vbmeta_flag|no_magisk_check)=' <<<"$AK_SCRIPT"; then
+  fail "AnyKernel 仍含小写变量，TWRP 会无法识别分区，拒绝发布"
+fi
 echo "zip: $(basename "$ZIP") ($ZIP_SIZE 字节)"
 echo "Image: $IMAGE_SIZE 字节"
 echo "zip sha256: $(sha256sum "$ZIP" | awk '{print $1}')"
