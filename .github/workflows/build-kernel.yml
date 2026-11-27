@@ -281,9 +281,17 @@ jobs:
           tar -xzf /tmp/ak3.tar.gz -C ak3 --strip-components=1
           cp "out_${DEVICE}/arch/arm64/boot/Image" ak3/Image
           cp scripts/ci/anykernel.sh ak3/anykernel.sh
-          grep -q '^is_slot_device=1$' ak3/anykernel.sh || {
-            echo "ERROR: AnyKernel 模板必须是 A/B（is_slot_device=1），拒绝生成 haydn zip"; exit 1;
+          grep -Fqx 'BLOCK=$block' ak3/anykernel.sh || {
+            echo "ERROR: AnyKernel 模板必须显式解析 BLOCK（大写变量），拒绝生成 haydn zip"; exit 1;
           }
+          for check in 'IS_SLOT_DEVICE=0' 'RAMDISK_COMPRESSION=auto' 'PATCHVBMETAFLAG=auto' 'NO_MAGISK_CHECK=1'; do
+            grep -qx "$check" ak3/anykernel.sh || {
+              echo "ERROR: AnyKernel 模板缺少大写变量：$check"; exit 1;
+            }
+          done
+          if grep -qE '^(is_slot_device|ramdisk_compression|patch_vbmeta_flag|no_magisk_check)=' ak3/anykernel.sh; then
+            echo "ERROR: AnyKernel 模板仍使用 AK3 不识别的小写变量，拒绝生成 haydn zip"; exit 1;
+          fi
           cd ak3
           zip -r9 "../HoshinoNeko_${DEVICE}_${TAG}_Any3Kernel.zip" . \
               -x '.git*' README.md '*placeholder'
