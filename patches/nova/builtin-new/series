@@ -1,0 +1,4 @@
+# haydn/nova-builtin-new 下游补丁顺序表
+# 每行一个 .patch 文件名；空行和 # 注释会被忽略。
+# 新增补丁时同时补 cases/<同名>.md；退役补丁时从本文件移除，但保留案卷。
+0001-ksu-inline-safe-mode.patch

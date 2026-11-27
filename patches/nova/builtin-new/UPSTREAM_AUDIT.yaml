@@ -1,0 +1,26 @@
+# haydn/nova-builtin-new 的下游补丁审计表
+#
+# audited_submodule_commit 必须与构建时 KernelSU 子模块 HEAD 完全一致。
+# 如果追上游更新后没有更新本字段，apply-nova-patches.sh 会直接失败，
+# 强制先审计，而不是静默带着过期补丁继续构建。
+audited_submodule_commit: 5a3ec4145059ed2c4f22c70a16a28a616e104c33
+audited_at: "2026-11-27"
+upstream:
+  repo: SukiSU-Nova/SukiSU-Nova
+  branch: builtin-new
+patches:
+  0001-ksu-inline-safe-mode:
+    status: active
+    upstream_status: not-fixed
+    checked_against: 5a3ec4145059ed2c4f22c70a16a28a616e104c33
+    reason: >-
+      CONFIG_KSU_SUSFS_INLINE_HOOK 路径下，input.c 无条件调用
+      ksu_handle_input_handle_event()；停止 input hook 后 handler 仍会累计
+      音量键并置 safe_mode_flag。此前上游修复只覆盖非 inline 路径。
+    watch_paths:
+      - kernel/runtime/ksud_integration.c
+      - kernel/runtime/ksud.c
+    removal_condition: >-
+      上游 builtin-new 在 ksu_handle_input_handle_event() 内增加
+      ksu_input_hook_active() 保护，或等价地让停止 hook 后不再采样；
+      该修复进入本仓库固定的 KernelSU commit 后，标记 retired 并从 series 移除。

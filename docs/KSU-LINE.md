@@ -6,6 +6,7 @@
 - 管理器：`com.sukisu.nova`
 - SUSFS：`v2.4.0`（5.4 移植，CI 构建通过；含 UID filter 命令接线，真机未验证）
 - 对应 BakaSU 线：<https://github.com/luanmuc/android_kernel_xiaomi_sm8350_miyume>
+- 下游补丁台账：`patches/nova/builtin-new/README.md`
 
 ## 发布标题
 

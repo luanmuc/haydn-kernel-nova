@@ -107,6 +107,18 @@ patches-*
 patches
 series
 
+# 本仓库长期维护的下游补丁台账（覆盖上面的 quilt 忽略）
+!patches/
+!patches/nova/
+!patches/nova/builtin-new/
+!patches/nova/builtin-new/series
+!patches/nova/builtin-new/UPSTREAM_AUDIT.yaml
+!patches/nova/builtin-new/*.patch
+!patches/nova/builtin-new/cases/
+!patches/nova/builtin-new/cases/*.md
+!patches/nova/builtin-new/templates/
+!patches/nova/builtin-new/templates/*.md
+
 # cscope files
 cscope.*
 ncscope.*
