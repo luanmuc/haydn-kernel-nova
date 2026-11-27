@@ -216,6 +216,35 @@ jobs:
           # .config 是隐藏文件，upload-artifact 默认不收；复制一份非隐藏名，随产物上传
           cp "out_${DEVICE}/.config" "haydn-config-used.txt"
 
+      - name: "9a) 关闭可选内核日志与统计（只保留 boot/崩溃必需的 printk）"
+        run: |
+          set -eu
+          CFG="out_${DEVICE}/.config"
+          # KSU：关闭 KernelSU 全部 dmesg 输出；SUSFS 编译期日志一并关掉
+          scripts/config --file "$CFG" --enable KSU_NOPRINTK
+          scripts/config --file "$CFG" --disable KSU_SUSFS_ENABLE_LOG
+          # 通用 printk 只关时间戳/caller 附加信息；CONFIG_PRINTK 本身保留，
+          # 否则 boot、panic、pstore 全都没有可读日志，排障风险太大。
+          scripts/config --file "$CFG" --disable PRINT_SUSPEND_EPOCH_QGKI
+          scripts/config --file "$CFG" --disable PRINTK_TIME
+          scripts/config --file "$CFG" --disable PRINTK_CALLER
+          # 统计/日志型驱动，不影响功能
+          for sym in \
+            THERMAL_STATISTICS \
+            QTI_PMIC_PON_LOG \
+            QTI_HW_MEMLAT_LOG \
+            QTI_RPM_STATS_LOG \
+            QTI_DDR_STATS_LOG \
+            QCOM_SUBSYSTEM_SLEEP_STATS \
+            QCOM_SOC_SLEEP_STATS \
+            QCOM_SYSMON_SUBSYSTEM_STATS \
+            QCOM_RUN_QUEUE_STATS; do
+            scripts/config --file "$CFG" --disable "$sym"
+          done
+          echo "=== 日志开关核对 ==="
+          grep -E "CONFIG_(KSU_NOPRINTK|KSU_SUSFS_ENABLE_LOG|PRINT_SUSPEND_EPOCH_QGKI|PRINTK_TIME|PRINTK_CALLER|THERMAL_STATISTICS|QTI_PMIC_PON_LOG|QTI_HW_MEMLAT_LOG|QTI_RPM_STATS_LOG|QTI_DDR_STATS_LOG|QCOM_SUBSYSTEM_SLEEP_STATS|QCOM_SOC_SLEEP_STATS|QCOM_SYSMON_SUBSYSTEM_STATS|QCOM_RUN_QUEUE_STATS)" "$CFG" || true
+          cp "$CFG" "haydn-config-used.txt"
+
       - name: "10) 编译 Image（ccache 加速，仅 Image，不编 modules）"
         id: build
         run: |
