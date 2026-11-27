@@ -3,7 +3,7 @@
 > **本仓库只维护 SukiSU-Nova builtin 线（Nova 线）。**
 >
 > BakaSU 稳定线在另一个独立仓库：  
-> https://github.com/luanmuc/android_kernel_xiaomi_sm8350_miyume
+> https://github.com/luanmuc/haydn-kernel-bakasu
 >
 > 两条线不要混刷；Nova 线使用 `com.sukisu.nova` 管理器。
 
