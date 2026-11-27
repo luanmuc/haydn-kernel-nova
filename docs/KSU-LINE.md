@@ -4,8 +4,8 @@
 - 默认 / 唯一主线：`haydn/nova-builtin-new`
 - KSU：SukiSU-Nova `builtin-new`，子模块固定 `5a3ec414`，内核显示 `30007-6`
 - 管理器：上游 `v3.0.0`，`35000-6`，包名 `com.sukisu.nova`
-- SUSFS：`v2.4.0 (SUSFS Inline Hook)`，已随 `07e07dff3` 正式版真机验证
-- 当前正式 tag：`haydn-07e07dff3-official-2026-11-27`
+- SUSFS：`v2.4.0 (SUSFS Inline Hook)`，核心随 `07e07dff3` 正式版真机验证，`8c4f9557d` 仅关闭日志
+- 当前正式 tag：`haydn-8c4f9557d-official-2026-11-27`
 - 对应 BakaSU 线：<https://github.com/luanmuc/haydn-kernel-bakasu>
 - 下游补丁台账：`patches/nova/builtin-new/README.md`
 
