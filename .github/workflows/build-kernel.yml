@@ -26,8 +26,9 @@ env:
   CCACHE_MAXSIZE: "3G"
   CCACHE_COMPRESS: "true"
   CCACHE_COMPRESSLEVEL: "1"
-  # depend mode：跳过重复预处理，命中判定更快（内核用 -Wp,-MD，兼容）
-  CCACHE_DEPEND: "true"
+  # 关闭 depend mode：它跳过预处理，但源码/选项一变就直接 miss；
+  # 默认的 direct + preprocessor 回退更容易吃到旧对象，命中率更高。
+  CCACHE_NODEPEND: "true"
   # 内核里有 __DATE__/__TIME__、且每次 checkout 都是新 mtime；
   # 放开这几项 sloppiness，命中率才上得来（内容仍然参与哈希，不会算错）
   CCACHE_SLOPPINESS: "time_macros,include_file_mtime,include_file_ctime"
