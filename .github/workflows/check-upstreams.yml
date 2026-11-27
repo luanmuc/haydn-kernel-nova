@@ -1,0 +1,44 @@
+name: Check upstreams
+
+on:
+  schedule:
+    # 每周一 09:00 Asia/Shanghai（01:00 UTC）
+    - cron: "0 1 * * 1"
+  workflow_dispatch:
+    inputs:
+      fail_on_update:
+        description: 有上游更新或本地 pin 失败时让 job 失败
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: check-upstreams
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Check three upstreams
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+          FAIL_ON_UPDATE: ${{ inputs.fail_on_update }}
+        run: |
+          set -o pipefail
+          args=(--format markdown)
+          if [ "$FAIL_ON_UPDATE" = "true" ]; then
+            args+=(--fail-on-update)
+          fi
+          python3 scripts/ci/check-upstreams.py "${args[@]}" | tee -a "$GITHUB_STEP_SUMMARY"

@@ -65,8 +65,10 @@ bash build_device.sh haydn
 
 - 只保留 `haydn/nova-builtin-new` 一条主线；不再保留 stable/test/feature 长期分支。
 - 正式 tag 从主线 commit 打；Release 资产按 [`docs/RELEASE-STANDARD.md`](docs/RELEASE-STANDARD.md) 执行。
+- 上游巡检：`scripts/ci/check-upstreams.sh`（实际逻辑在 `check-upstreams.py`），每周由 CI 检查 MiYume、SukiSU-Nova、SUSFS 是否有新提交；只报告，不自动合并。
 - 历史默认分支 `haydn/nova` 已并入主线并删除；历史 FCM6、CFI 试验分支已清理。
 - KSU 线说明见 [`docs/KSU-LINE.md`](docs/KSU-LINE.md)，SUSFS 移植记录见 [`docs/SUSFS-2.4-PORT.md`](docs/SUSFS-2.4-PORT.md)，CI 日志规则见 [`docs/CI-LOG-POLICY.md`](docs/CI-LOG-POLICY.md)。
+- 上游巡检规则见 [`docs/UPSTREAM-CHECK.md`](docs/UPSTREAM-CHECK.md)。
 - 发布说明模板见 [`docs/RELEASE-TEMPLATE.md`](docs/RELEASE-TEMPLATE.md)。
 
 ## 禁止
