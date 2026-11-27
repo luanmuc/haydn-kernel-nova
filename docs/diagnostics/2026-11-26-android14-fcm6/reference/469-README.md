@@ -53,7 +53,7 @@ fastboot boot Nova-haydn-patched-clean-boot-diag-469e7e420.img
 ## 构建缓存说明
 
 - Clang 缓存命中：没有重新下载 996MB 工具链
-- ccache 恢复的是 `ccache-haydn-45416356639-1`，属于 GitHub 默认分支 `haydn/nova` 的旧 190MB 缓存
+- ccache 恢复的是 `ccache-haydn-45416356639-1`，属于当时默认分支 `haydn/nova`（已删除）的旧 190MB 缓存
 - 本次 ccache：`4302 / 12521 = 34.36%` 直接命中，primary 50.26%，miss 8219，uncacheable 5043
 - 临时分支看不到 `haydn/nova-builtin-new` 的 490MB ccache，这是命中率不高的主要原因
 - AnyKernel3 缓存首次 miss，构建成功后已保存，下次会命中

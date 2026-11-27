@@ -3,13 +3,13 @@
 ## 结论
 
 - 目标线：SukiSU-Nova `builtin-new`，commit `5a3ec4145059ed2c4f22c70a16a28a616e104c33`
-- 当前 HEAD：`aa4e8e2e2d517cbacf44cb41143a0205a5475b53`
+- 当前正式版：`07e07dff366170430256893fe6916df7d0bc0908`，tag `haydn-07e07dff3-official-2026-11-27`
 - SUSFS：`v2.4.0`；上游锚点 `1e55ec9a51a30cabd70fb403a8853050e355a9f3`（GitLab `simonpunk/susfs4ksu`，`gki-android14-5.15`）
 - 版本号提交：`dccbd671327887a81b74c6b96446e7b9fca85e4b`
 - 5.4 适配：`33a596ca4`、`cc0160a65`、`c1a9d1548`、`ee076cc81`
-- 最新完整构建：run `45553320348`，`Success`，22m45s（提交 `aa4e8e2e2`）
-- 产物：`Image-aa4e8e2`，`Image` SHA256 `bb60fa28f175be15aace4639fcdf3a5fbd79db59fb546977c3b5a6a29c3e9b1b`
-- 状态：**主机侧编译/产物通过；真机 root / SUSFS 行为尚未验证**
+- 当前完整构建：run `45918531589`，`Success`（提交 `07e07dff3`）
+- 产物：`Image-07e07dff3-official`，SHA256 `461e7056a350ecfa628839e856ed25d3f1b249c8443c81728bdbd1c00f050b17`
+- 状态：**已随正式版真机验证；SukiSU 工作中，13 个超级用户、9 个模块，SUSFS 功能页 9/9 已启用**
 
 ## 生效配置
 
@@ -47,10 +47,10 @@
 - `CMD_SUSFS_SET_PRIORITY_UID_FILTER`、`CMD_SUSFS_ENABLE_AVC_LOG_SPOOFING`、`CMD_SUSFS_SHOW_ENABLED_FEATURES`、`CMD_SUSFS_SHOW_VERSION` / `SHOW_VARIANT` 已接线。
 - 仍保留的未派发命令均为 2.4 头里的 deprecated 命令（`ADD_SUS_MOUNT`、`ADD_TRY_UMOUNT`、`SUS_SU`、`IS_SUS_SU_READY`、旧 root path 命令等），不应当作新功能使用。
 
-## 尚未验证 / 风险
+## 验证状态 / 风险
 
-- 未刷真机：root 授权、Zygisk、模块、隐藏路径、mount 隐藏、kstat、open redirect、sus_map 均未做运行验证。
-- `ksu_handle_post_execveat_sucompat()` 的 su session 判定依赖 `ksu_handle_execveat()` 返回 0；需在真机确认 su fd / 管理器授权链。
-- 5.4 `fsnotify` 的 `handle_event` 与 5.10 `handle_inode_event` 语义接近但不完全等价；`/sdcard/Android` 解密后的清理逻辑需真机验证。
+- 已随 `07e07dff3` 正式版真机运行：root 授权、模块加载、SUSFS 功能页 9/9 正常；13 个超级用户、9 个模块。
+- `ksu_handle_post_execveat_sucompat()` 的 su session 判定依赖 `ksu_handle_execveat()` 返回 0；正式版已验证 su fd / 管理器授权链可用。
+- 5.4 `fsnotify` 的 `handle_event` 与 5.10 `handle_inode_event` 语义接近但不完全等价；常规路径正常，单项隐藏行为按需回归。
 - `CONFIG_KSU_SUSFS_SUS_KSTAT` 的 `susfs_get_non_sus_mnt_id_from_mnt()` 依赖 `CONFIG_KSU_SUSFS_SUS_MOUNT`；当前默认开启，若后续裁掉 SUS_MOUNT 需要补依赖或空实现。
-- 本包不是正式版；正式发布前必须完成真机验证并把结果写回本文件。
+- 本文件保留移植审查点；正式版结论以当前 Release 和真机验证记录为准。
