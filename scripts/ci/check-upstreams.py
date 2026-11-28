@@ -647,6 +647,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--root", default=str(ROOT_DEFAULT), help="仓库根目录")
     parser.add_argument("--pins", default="", help="pin JSON 路径；默认 <root>/maintenance/ksu-pins.json")
     parser.add_argument("--format", choices=("text", "markdown", "json"), default="text")
+    parser.add_argument("--json-out", default="", help="同时把原始 JSON 写入指定文件，供通知脚本使用")
     parser.add_argument("--offline", action="store_true", help="只做本地 pin 检查，不访问上游")
     parser.add_argument("--fail-on-update", action="store_true", help="有上游更新或本地 pin 失败时返回 2")
     args = parser.parse_args(argv)
@@ -673,6 +674,11 @@ def main(argv: list[str] | None = None) -> int:
         print(render_markdown(payload))
     else:
         print(render_text(payload))
+
+    if args.json_out:
+        out_path = Path(args.json_out)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
     s = payload["summary"]
     if s["has_errors"]:

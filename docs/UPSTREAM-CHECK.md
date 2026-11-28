@@ -37,6 +37,13 @@ bash scripts/ci/check-upstreams.sh --fail-on-update
 
 ## CI
 
-`.github/workflows/check-upstreams.yml` 每周一 09:00（Asia/Shanghai）跑一次，也可手动 `workflow_dispatch`。默认只把报告写进 Step Summary；手动触发时可勾选 `fail_on_update`。
+`.github/workflows/check-upstreams.yml` 每天 09:00（Asia/Shanghai）跑一次，也可手动 `workflow_dispatch`。默认只把报告写进 Step Summary；手动触发时可勾选 `fail_on_update`。
+
+通知策略：**只在有上游更新、本地 pin 失败、巡检错误或管理器不一致时通知**；全部正常时不打扰。通知顺序：
+
+1. 配置仓库 secret `FEISHU_WEBHOOK_URL` 时，发飞书群机器人；如果机器人启用了签名校验，再配置 `FEISHU_WEBHOOK_SECRET`。
+2. 没有飞书 webhook，或飞书发送失败时，自动在仓库创建/更新 `[上游巡检] 需要处理` Issue，并 @仓库 owner 兜底。
+
+通知脚本：`scripts/ci/notify-upstreams.py`，可用 `--dry-run` 本地预览。
 
 脚本只读，不自动 fetch/merge/rebase，不自动改 `maintenance/ksu-pins.json`，也不自动发 Release。

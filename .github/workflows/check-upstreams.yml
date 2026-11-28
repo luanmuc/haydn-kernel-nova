@@ -2,8 +2,8 @@ name: Check upstreams
 
 on:
   schedule:
-    # 每周一 09:00 Asia/Shanghai（01:00 UTC）
-    - cron: "0 1 * * 1"
+    # 每天 09:00 Asia/Shanghai（01:00 UTC）
+    - cron: "0 1 * * *"
   workflow_dispatch:
     inputs:
       fail_on_update:
@@ -14,6 +14,7 @@ on:
 
 permissions:
   contents: read
+  issues: write
 
 concurrency:
   group: check-upstreams
@@ -32,14 +33,30 @@ jobs:
           submodules: recursive
 
       - name: Check three upstreams
+        id: check
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
           FAIL_ON_UPDATE: ${{ inputs.fail_on_update }}
         run: |
           set -o pipefail
-          args=(--format markdown)
+          args=(--format markdown --json-out "$RUNNER_TEMP/upstreams.json")
           if [ "$FAIL_ON_UPDATE" = "true" ]; then
             args+=(--fail-on-update)
           fi
           python3 scripts/ci/check-upstreams.py "${args[@]}" | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Notify on changes or errors
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FEISHU_WEBHOOK_URL: ${{ secrets.FEISHU_WEBHOOK_URL }}
+          FEISHU_WEBHOOK_SECRET: ${{ secrets.FEISHU_WEBHOOK_SECRET }}
+          REPO: ${{ github.repository }}
+          CHECK_OUTCOME: ${{ steps.check.outcome }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          python3 scripts/ci/notify-upstreams.py \
+            --payload "$RUNNER_TEMP/upstreams.json" \
+            --run-url "$RUN_URL" \
+            --check-outcome "$CHECK_OUTCOME"
